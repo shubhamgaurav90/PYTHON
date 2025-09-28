@@ -36,7 +36,7 @@ THEMES = {
 }
 current_theme_name = "Dark"
 
-# --------- Helper functions ----------
+#HELPER FUNCTIONS
 def math_env():
     env = {}
     env.update(math.__dict__)       # bring math functions/constants
@@ -57,7 +57,7 @@ def safe_eval(expr, extra_vars=None):
     except Exception as e:
         raise
 
-# --------- Theme application ----------
+#THEME
 def apply_theme(theme_name):
     global current_theme_name
     current_theme_name = theme_name
@@ -89,7 +89,7 @@ def apply_theme(theme_name):
         except:
             pass
 
-# --------- Calculator logic ----------
+#LOGIC USED FOR CALCULAYIONS
 def press_key(key):
     if key == "=":
         evaluate_expression()
@@ -109,9 +109,9 @@ def evaluate_expression():
     expr = entry.get().strip()
     if not expr:
         return
-    # replace ^ with **
+   
     expr_safe = expr.replace("^", "**")
-    # handle plot call inside calculator - redirect to graph tab
+   
     if expr_safe.startswith("plot(") and expr_safe.endswith(")"):
         notebook.select(graph_tab)
         graph_input.delete(0, tk.END)
@@ -152,7 +152,7 @@ def on_history_double(event):
     entry.insert(0, expr)
     status_label.config(text=f"Reused: {expr}")
 
-# --------- Memory ----------
+
 def handle_memory(cmd):
     global memory_value
     try:
@@ -173,7 +173,7 @@ def handle_memory(cmd):
     except Exception:
         status_label.config(text="Memory Error")
 
-# --------- Graph plotting ----------
+
 def plot_from_input():
     expr = graph_input.get().strip()
     if not expr:
@@ -192,7 +192,7 @@ def plot_from_input():
             xmin = float(safe_eval(parts[1]))
             xmax = float(safe_eval(parts[2]))
         else:
-            # maybe provided only xmin or only xmax - fallback
+            
             xmin, xmax = -10, 10
 
         x = np.linspace(xmin, xmax, 400)
@@ -204,7 +204,7 @@ def plot_from_input():
             except Exception:
                 y.append(np.nan)
 
-        # clear figure
+        #CLEAR
         fig.clear()
         ax = fig.add_subplot(111)
         ax.plot(x, y, label=func_part)
@@ -220,7 +220,7 @@ def plot_from_input():
         status_label.config(text=f"Plot Error: {e}")
 
 def split_args(s):
-    # split by commas, but allow nested parentheses in func expression
+   
     args = []
     depth = 0
     cur = ""
@@ -238,7 +238,7 @@ def split_args(s):
         args.append(cur.strip())
     return args
 
-# --------- Unit converter ----------
+#UNIT CONVERSION
 def open_converter_tab():
     notebook.select(converter_tab)
 
@@ -275,7 +275,7 @@ def convert_unit():
     else:
         conv_result_var.set("Option not supported")
 
-# --------- UI Construction ----------
+#USER INTERFACE SETUP
 root = tk.Tk()
 root.title("All-in-One Scientific Calculator")
 root.geometry("1000x700")
@@ -289,18 +289,15 @@ style.configure("TNotebook.Tab", padding=[10, 6])
 notebook = ttk.Notebook(root)
 notebook.pack(fill="both", expand=True, padx=8, pady=8)
 
-# ---- Calculator Tab ----
 calc_tab = ttk.Frame(notebook)
 notebook.add(calc_tab, text="Calculator")
-
-# top frame for entry + history
 top_frame = tk.Frame(calc_tab)
 top_frame.pack(fill="x", padx=8, pady=6)
 
 entry = tk.Entry(top_frame, font=("Consolas", 20), justify="right", bd=6, relief="sunken")
 entry.pack(side="left", fill="x", expand=True, padx=(0,10), ipady=6)
 
-# Right frame: history & memory label
+#FARMES FOR HISTORY
 right_frame = tk.Frame(top_frame, width=260)
 right_frame.pack(side="right", fill="y")
 
@@ -318,7 +315,7 @@ tk.Button(mem_frame, text="M-", width=6, command=lambda: handle_memory("M-")).pa
 tk.Button(mem_frame, text="MR", width=6, command=lambda: handle_memory("MR")).pack(side="left", padx=3)
 tk.Button(mem_frame, text="MC", width=6, command=lambda: handle_memory("MC")).pack(side="left", padx=3)
 
-# buttons frame
+#FRAMINGS FOR BUTTONS
 buttons_frame = tk.Frame(calc_tab)
 buttons_frame.pack(fill="both", expand=True, padx=8, pady=6)
 
@@ -339,17 +336,16 @@ for r, row in enumerate(calc_button_texts):
         b.grid(row=r, column=c, padx=6, pady=6, sticky="nsew")
         calc_buttons.append(b)
 
-# make grid expand nicely
+#ROW AND COLUMN DISTINGUIHSERS
 for i in range(len(calc_button_texts)):
     buttons_frame.grid_rowconfigure(i, weight=1)
 for j in range(5):
     buttons_frame.grid_columnconfigure(j, weight=1)
 
-# Status bar
 status_label = tk.Label(root, text="Ready", anchor="w", font=("Consolas", 11))
 status_label.pack(fill="x", padx=8, pady=(0,6))
 
-# ---- Converter Tab ----
+#CONVERSION TABS
 converter_tab = ttk.Frame(notebook)
 notebook.add(converter_tab, text="Converter")
 
@@ -378,14 +374,14 @@ conv_result_var = tk.StringVar(value="")
 conv_result_label = tk.Label(conv_frame, textvariable=conv_result_var, font=("Consolas", 14, "bold"))
 conv_result_label.pack(pady=6)
 
-# ---- Graph Tab ----
+#GRAPH TAB
 graph_tab = ttk.Frame(notebook)
 notebook.add(graph_tab, text="Graph")
 
 graph_panel = tk.Frame(graph_tab)
 graph_panel.pack(fill="both", expand=True, padx=8, pady=8)
 
-# input area for plot
+# PLOTTING INPUTS
 graph_input_frame = tk.Frame(graph_panel)
 graph_input_frame.pack(fill="x", padx=6, pady=6)
 tk.Label(graph_input_frame, text="Plot command:", font=("Consolas", 12)).pack(side="left")
@@ -394,7 +390,7 @@ graph_input.pack(side="left", fill="x", expand=True, padx=6)
 graph_input.insert(0, "plot(sin(x), -6.28, 6.28)")
 tk.Button(graph_input_frame, text="Plot", command=plot_from_input).pack(side="left", padx=6)
 
-# matplotlib figure
+# GRAPHS USAGE OF MATPLOTLIB
 fig = Figure(figsize=(6,4), dpi=100)
 ax = fig.add_subplot(111)
 ax.grid(True)
@@ -402,7 +398,7 @@ canvas = FigureCanvasTkAgg(fig, master=graph_panel)
 canvas.get_tk_widget().pack(fill="both", expand=True)
 canvas.draw()
 
-# ---- Settings Tab ----
+
 settings_tab = ttk.Frame(notebook)
 notebook.add(settings_tab, text="Settings")
 
@@ -416,19 +412,18 @@ for name in THEMES.keys():
                         command=lambda n=name: apply_theme(n), font=("Consolas", 12))
     rb.pack(anchor="w")
 
-# quick tips
+
 tk.Label(settings_frame, text="\nQuick Tips:", font=("Consolas", 12, "bold")).pack(anchor="w", pady=(10,2))
 tk.Label(settings_frame, text="- Use '^' for power (2^3 = 8)\n- Use factorial(n) for n!\n- Use plot(expr, xmin, xmax) to graph\n- Double-click history to reuse",
          justify="left", font=("Consolas", 11)).pack(anchor="w")
 
-# ---- Wire up initial theme and other small bindings ----
 apply_theme(current_theme_name)
 refresh_history_box()
 
-# allow Enter key to evaluate in calculator entry
+
 entry.bind("<Return>", lambda e: evaluate_expression())
 
-# menu: give ability to jump to sections quickly
+
 menubar = tk.Menu(root)
 root.config(menu=menubar)
 nav_menu = tk.Menu(menubar, tearoff=0)
@@ -438,5 +433,4 @@ nav_menu.add_command(label="Converter", command=lambda: notebook.select(converte
 nav_menu.add_command(label="Graph", command=lambda: notebook.select(graph_tab))
 nav_menu.add_command(label="Settings", command=lambda: notebook.select(settings_tab))
 
-# finish
 root.mainloop()
